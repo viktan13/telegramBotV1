@@ -1,6 +1,22 @@
 const { Telegraf } = require('telegraf')
 const { message } = require('telegraf/filters')
 const { sum, subtr, div, mult, oddOrEven } = require('./handlers');
+const { Sequelize } = require('sequelize');
+const path = require('path');
+const os = require('os');
+
+const dbPath = path.join(os.homedir(), 'test.db');
+
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: dbPath
+});
+
+sequelize.authenticate().then(() => {
+    console.log('Database Connection has been established successfully.');
+}).catch((error) => {
+    console.error('Unable to connect to the database:', error);
+})
 
 const bot = new Telegraf('8591254275:AAGzLxzSB8u4pxy024wXU3NpMYbz-T9cIfM')
 
@@ -8,13 +24,13 @@ const database = {};
 
 bot.command('profile', (ctx) => {
     const user = ctx.update.message.from;
-    const id = user.id; 
+    const id = user.id;
     if (database[id]) {
         const name = database[id].name || (user.first_name + ' ' + user.last_name);
         ctx.reply(`Your name is ${name}\nAge: ${database[id].age}\nCity: ${database[id].city}`);
     } else {
         ctx.reply('No profile information found. Please provide your details using /name command.');
-    }   
+    }
 });
 
 bot.start((ctx) => ctx.reply('Welcome to PASV'))
@@ -40,22 +56,22 @@ bot.on(message('text'), (ctx, next) => {
             database[id] = {};
             if (userName) database[id].name = userName + ' ' + user.last_name;
             ctx.reply('How old are you?');
-           // Proceed to next middleware to ask for age
-           return next();
-           
+            // Proceed to next middleware to ask for age
+            return next();
+
         }
     } else if (database[ctx.update.message.from.id] && !database[ctx.update.message.from.id].age) {
         const id = ctx.update.message.from.id;
-        const age = parseInt(ctx.message.text); 
+        const age = parseInt(ctx.message.text);
         database[id].age = age;
-        ctx.reply(`Where do you live?`);   
-        return next(); 
+        ctx.reply(`Where do you live?`);
+        return next();
 
     } else if (database[ctx.update.message.from.id] && !database[ctx.update.message.from.id].city) {
         const id = ctx.update.message.from.id;
-        const city = ctx.message.text; 
+        const city = ctx.message.text;
         database[id].city = city;
-        ctx.reply(`Thank you for the information!`);    
+        ctx.reply(`Thank you for the information!`);
 
     };
 });
