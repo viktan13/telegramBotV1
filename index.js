@@ -4,6 +4,7 @@ const { sum, subtr, div, mult, oddOrEven } = require('./handlers');
 const { Sequelize } = require('sequelize');
 const path = require('path');
 const os = require('os');
+require('dotenv').config()
 
 const dbPath = path.join(os.homedir(), 'test.db');
 
@@ -18,7 +19,7 @@ sequelize.authenticate().then(() => {
     console.error('Unable to connect to the database:', error);
 })
 
-const bot = new Telegraf('8591254275:AAGzLxzSB8u4pxy024wXU3NpMYbz-T9cIfM')
+const bot = new Telegraf(process.env.TELEGRAF_TOKEN)
 
 const database = {};
 
