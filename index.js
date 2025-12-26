@@ -13,11 +13,26 @@ const sequelize = new Sequelize({
     storage: dbPath
 });
 
-sequelize.authenticate().then(() => {
-    console.log('Database Connection has been established successfully.');
-}).catch((error) => {
-    console.error('Unable to connect to the database:', error);
-})
+sequelize.authenticate()
+    .then(() => {
+        console.log('Connection has been established successfully.');
+        return sequelize.query('PRAGMA foreign_keys = ON');
+    })
+    .then(() => {
+        console.log('Foreign keys are ON.');
+        return sequelize.query('PRAGMA foreign_keys;');
+    })
+    .then((result) => {
+        console.log('PRAGMA foreign_keys result:', result);
+    })
+    .catch((error) => {
+        console.error('Unable to connect to the database:', error);
+    });
+
+
+
+
+
 
 const bot = new Telegraf(process.env.TELEGRAF_TOKEN)
 
